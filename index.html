@@ -3,26 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OMNI COSMOS 3D Universe Simulator</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>OMNI COSMOS - Full 1st Magnitude Stars & Cosmic Web</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Welcome to OMNI COSMOS 3D Universe Simulator</h1>
-    </header>
-    <main>
-        <section id="simulation">
-            <canvas id="universeCanvas"></canvas>
-        </section>
-        <section id="controls">
-            <h2>Controls</h2>
-            <button id="startSimulation">Start Simulation</button>
-            <button id="stopSimulation">Stop Simulation</button>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2026 OMNI COSMOS Team</p>
-    </footer>
-    <script src="script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Function to create a celestial object
+        function createCelestialObject(size, color) {
+            const geometry = new THREE.SphereGeometry(size, 32, 32);
+            const material = new THREE.MeshBasicMaterial({ color });
+            return new THREE.Mesh(geometry, material);
+        }
+
+        // Example stars
+        const star1 = createCelestialObject(0.2, 0xffcc00);
+        star1.position.set(-5, 1, -10);
+        scene.add(star1);
+
+        const star2 = createCelestialObject(0.3, 0x00ccff);
+        star2.position.set(5, -1, -15);
+        scene.add(star2);
+
+        // Add more celestial objects as needed
+
+        camera.position.z = 5;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            star1.rotation.x += 0.01;
+            star1.rotation.y += 0.01;
+            star2.rotation.x += 0.01;
+            star2.rotation.y += 0.01;
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
 </body>
 </html>
