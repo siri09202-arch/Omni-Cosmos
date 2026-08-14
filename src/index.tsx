@@ -130,53 +130,58 @@ app.get('/', (c) => {
         let trackingTarget = null;
         let targetLookAt = new THREE.Vector3(0, 0, 0);
         let currentLookAt = new THREE.Vector3(0, 0, 0);
-        let zoomDistance = 10000;
+        let zoomDistance = 100000;
         let cameraOffset = new THREE.Vector3(1, 0.4, 1.2).normalize();
+
+        // ===== スケール定数 =====
+        // 惑星軌道・小惑星帯・彗星の軌道半径を10倍に拡大
+        // 衛星の親惑星からの距離は大幅拡大（衛星が密集しないよう広く）
+        const S = 10; // 太陽系スケール倍率
 
         const DATA = {
             solar: [
                 { name: "太陽", color: 0xFFDD44, size: 7500, dist: 0, speed: 0, meta: "恒星 (G2V)", desc: "太陽系の中心。全質量の99.8%を占める。", type: "sun" },
-                { name: "水星", color: 0xAAAAAA, size: 400, dist: 39000, speed: 0.047, meta: "惑星", desc: "太陽に最も近い、クレーターだらけの惑星。", type: "rocky" },
-                { name: "金星", color: 0xFFCC88, size: 700, dist: 57000, speed: 0.035, meta: "惑星", desc: "厚い硫酸の雲に覆われた灼熱の惑星。", type: "cloudy" },
-                { name: "地球", color: 0x2266FF, size: 760, dist: 81000, speed: 0.029, meta: "惑星", desc: "生命が確認されている唯一の天体。", type: "earth" },
-                { name: "火星", color: 0xFF5533, size: 560, dist: 108000, speed: 0.024, meta: "惑星", desc: "酸化鉄の影響で赤く見える惑星。", type: "rocky" },
-                { name: "木星", color: 0xE6B18A, size: 2200, dist: 210000, speed: 0.013, meta: "ガス巨大惑星", desc: "太陽系最大の惑星。大赤斑がある。", type: "gas" },
-                { name: "土星", color: 0xF2E1AC, size: 2000, dist: 288000, speed: 0.009, meta: "ガス巨大惑星", desc: "氷の粒子からなる美しい環を持つ。", type: "gas", hasRing: true, ringColor: 0xAD9F7B, ringInner: 1.4, ringOuter: 2.3 },
-                { name: "天王星", color: 0xBBE1E4, size: 1200, dist: 372000, speed: 0.006, meta: "氷巨大惑星", desc: "自転軸がほぼ横倒しになっている。", type: "gas", hasRing: true, ringColor: 0x88AAAA, ringInner: 1.8, ringOuter: 1.9 },
-                { name: "海王星", color: 0x4466FF, size: 1200, dist: 450000, speed: 0.005, meta: "氷巨大惑星", desc: "強風が吹き荒れる青い惑星。", type: "gas" }
+                { name: "水星", color: 0xAAAAAA, size: 400, dist: 390000, speed: 0.047, meta: "惑星", desc: "太陽に最も近い、クレーターだらけの惑星。", type: "rocky" },
+                { name: "金星", color: 0xFFCC88, size: 700, dist: 570000, speed: 0.035, meta: "惑星", desc: "厚い硫酸の雲に覆われた灼熱の惑星。", type: "cloudy" },
+                { name: "地球", color: 0x2266FF, size: 760, dist: 810000, speed: 0.029, meta: "惑星", desc: "生命が確認されている唯一の天体。", type: "earth" },
+                { name: "火星", color: 0xFF5533, size: 560, dist: 1080000, speed: 0.024, meta: "惑星", desc: "酸化鉄の影響で赤く見える惑星。", type: "rocky" },
+                { name: "木星", color: 0xE6B18A, size: 2200, dist: 2100000, speed: 0.013, meta: "ガス巨大惑星", desc: "太陽系最大の惑星。大赤斑がある。", type: "gas" },
+                { name: "土星", color: 0xF2E1AC, size: 2000, dist: 2880000, speed: 0.009, meta: "ガス巨大惑星", desc: "氷の粒子からなる美しい環を持つ。", type: "gas", hasRing: true, ringColor: 0xAD9F7B, ringInner: 1.4, ringOuter: 2.3 },
+                { name: "天王星", color: 0xBBE1E4, size: 1200, dist: 3720000, speed: 0.006, meta: "氷巨大惑星", desc: "自転軸がほぼ横倒しになっている。", type: "gas", hasRing: true, ringColor: 0x88AAAA, ringInner: 1.8, ringOuter: 1.9 },
+                { name: "海王星", color: 0x4466FF, size: 1200, dist: 4500000, speed: 0.005, meta: "氷巨大惑星", desc: "強風が吹き荒れる青い惑星。", type: "gas" }
             ],
             dwarfs: [
-                { name: "冥王星", color: 0xDFCAB5, size: 300, dist: 570000, speed: 0.004, meta: "準惑星", desc: "カイパーベルト最大の天体。かつて第9惑星とされていた。", type: "rocky" },
-                { name: "ケレス", color: 0x999999, size: 240, dist: 168000, speed: 0.017, meta: "準惑星", desc: "火星と木星の間の小惑星帯にある唯一の準惑星。", type: "rocky" },
-                { name: "エリス", color: 0xEEEEEE, size: 300, dist: 780000, speed: 0.002, meta: "準惑星", desc: "冥王星と同程度の質量を持つ、散乱円盤天体の準惑星。", type: "rocky" },
-                { name: "マケマケ", color: 0xCC8866, size: 220, dist: 660000, speed: 0.003, meta: "準惑星", desc: "イースター島の創造神にちなんで名付けられた氷の準惑星。", type: "rocky" },
-                { name: "ハウメア", color: 0xFFFFFF, size: 200, dist: 630000, speed: 0.0035, meta: "準惑星", desc: "高速自転によりラグビーボールのように引き伸ばされた形状をしている。", type: "rocky" }
+                { name: "冥王星", color: 0xDFCAB5, size: 300, dist: 5700000, speed: 0.004, meta: "準惑星", desc: "カイパーベルト最大の天体。かつて第9惑星とされていた。", type: "rocky" },
+                { name: "ケレス", color: 0x999999, size: 240, dist: 1680000, speed: 0.017, meta: "準惑星", desc: "火星と木星の間の小惑星帯にある唯一の準惑星。", type: "rocky" },
+                { name: "エリス", color: 0xEEEEEE, size: 300, dist: 7800000, speed: 0.002, meta: "準惑星", desc: "冥王星と同程度の質量を持つ、散乱円盤天体の準惑星。", type: "rocky" },
+                { name: "マケマケ", color: 0xCC8866, size: 220, dist: 6600000, speed: 0.003, meta: "準惑星", desc: "イースター島の創造神にちなんで名付けられた氷の準惑星。", type: "rocky" },
+                { name: "ハウメア", color: 0xFFFFFF, size: 200, dist: 6300000, speed: 0.0035, meta: "準惑星", desc: "高速自転によりラグビーボールのように引き伸ばされた形状をしている。", type: "rocky" }
             ],
             asteroids: [
-                { name: "ベスタ", color: 0xDDDDCC, size: 180, dist: 156000, speed: 0.019, meta: "小惑星", desc: "小惑星帯（メインベルト）で最も明るく見える岩石天体。", type: "rocky" },
-                { name: "パラス", color: 0xAACCFF, size: 180, dist: 165000, speed: 0.018, meta: "小惑星", desc: "小惑星帯で3番目に大きい。軌道傾斜角が大きいのが特徴。", type: "rocky" },
-                { name: "ヒギエア", color: 0x888888, size: 160, dist: 186000, speed: 0.016, meta: "小惑星", desc: "炭素質で黒っぽい、小惑星帯で4番目に大きい天体。", type: "rocky" },
-                { name: "リュウグウ", color: 0x444444, size: 60, dist: 84000, speed: 0.028, meta: "地球近傍小惑星", desc: "「はやぶさ2」が探査を行ったC型小惑星。", type: "rocky" },
-                { name: "イトカワ", color: 0xAAAA99, size: 40, dist: 90000, speed: 0.027, meta: "地球近傍小惑星", desc: "「はやぶさ」が探査を行ったS型小惑星。ラッコのような形。", type: "rocky" },
-                { name: "ベンヌ", color: 0x555566, size: 60, dist: 87000, speed: 0.0275, meta: "地球近傍小惑星", desc: "OSIRIS-RExがサンプルリターンを行った小惑星。", type: "rocky" }
+                { name: "ベスタ", color: 0xDDDDCC, size: 180, dist: 1560000, speed: 0.019, meta: "小惑星", desc: "小惑星帯（メインベルト）で最も明るく見える岩石天体。", type: "rocky" },
+                { name: "パラス", color: 0xAACCFF, size: 180, dist: 1650000, speed: 0.018, meta: "小惑星", desc: "小惑星帯で3番目に大きい。軌道傾斜角が大きいのが特徴。", type: "rocky" },
+                { name: "ヒギエア", color: 0x888888, size: 160, dist: 1860000, speed: 0.016, meta: "小惑星", desc: "炭素質で黒っぽい、小惑星帯で4番目に大きい天体。", type: "rocky" },
+                { name: "リュウグウ", color: 0x444444, size: 60, dist: 840000, speed: 0.028, meta: "地球近傍小惑星", desc: "「はやぶさ2」が探査を行ったC型小惑星。", type: "rocky" },
+                { name: "イトカワ", color: 0xAAAA99, size: 40, dist: 900000, speed: 0.027, meta: "地球近傍小惑星", desc: "「はやぶさ」が探査を行ったS型小惑星。ラッコのような形。", type: "rocky" },
+                { name: "ベンヌ", color: 0x555566, size: 60, dist: 870000, speed: 0.0275, meta: "地球近傍小惑星", desc: "OSIRIS-RExがサンプルリターンを行った小惑星。", type: "rocky" }
             ],
             tnos: [
-                { name: "セドナ", color: 0xFF6644, size: 280, dist: 1800000, speed: 0.0005, meta: "分離天体", desc: "極めて遠方を公転する、赤みがかった謎多き天体。", type: "rocky" },
-                { name: "ゴンゴン", color: 0xDD6666, size: 260, dist: 900000, speed: 0.0018, meta: "散乱円盤天体", desc: "2007 OR10としても知られる、赤色で大型の天体。", type: "rocky" },
-                { name: "クワオアー", color: 0x887766, size: 240, dist: 690000, speed: 0.0028, meta: "キュビワノ族", desc: "真円に近い軌道を持つ大型のカイパーベルト天体。", type: "rocky" },
-                { name: "オルクス", color: 0xAAAAAA, size: 220, dist: 564000, speed: 0.004, meta: "冥王星族", desc: "冥王星と似た軌道をもち、「アンチ・プルート」とも呼ばれる。", type: "rocky" }
+                { name: "セドナ", color: 0xFF6644, size: 280, dist: 18000000, speed: 0.0005, meta: "分離天体", desc: "極めて遠方を公転する、赤みがかった謎多き天体。", type: "rocky" },
+                { name: "ゴンゴン", color: 0xDD6666, size: 260, dist: 9000000, speed: 0.0018, meta: "散乱円盤天体", desc: "2007 OR10としても知られる、赤色で大型の天体。", type: "rocky" },
+                { name: "クワオアー", color: 0x887766, size: 240, dist: 6900000, speed: 0.0028, meta: "キュビワノ族", desc: "真円に近い軌道を持つ大型のカイパーベルト天体。", type: "rocky" },
+                { name: "オルクス", color: 0xAAAAAA, size: 220, dist: 5640000, speed: 0.004, meta: "冥王星族", desc: "冥王星と似た軌道をもち、「アンチ・プルート」とも呼ばれる。", type: "rocky" }
             ],
             comets: [
-                { name: "1P/ハレー", color: 0x00FFFF, size: 160, a: 240000, e: 0.967, i: 162, speed: 0.08, meta: "短周期彗星", desc: "約76年周期で回帰する最も有名な彗星。" },
-                { name: "2P/エンケ", color: 0xCCFFCC, size: 120, a: 72000, e: 0.848, i: 11, speed: 0.15, meta: "短周期彗星", desc: "周期3.3年。おうし座流星群の母天体。" },
-                { name: "67P/C-G", color: 0xAAAAAA, size: 140, a: 132000, e: 0.641, i: 7, speed: 0.1, meta: "短周期彗星", desc: "ロゼッタ探査機が着陸機フィラエを送り込んだ。" },
-                { name: "153P/池谷・張", color: 0xCCFFFF, size: 180, a: 900000, e: 0.990, i: 28, speed: 0.03, meta: "長周期彗星", desc: "2002年に発見された明るい彗星。" },
-                { name: "C/1995 O1", color: 0xFFFFFF, size: 240, a: 1500000, e: 0.995, i: 89, speed: 0.02, meta: "ヘール・ボップ彗星", desc: "1997年に肉眼で長期間観測された大彗星。" },
-                { name: "マックノート C/2006 P1", color: 0xFFDD88, size: 200, a: 3000000, e: 0.9999, i: 77, speed: 0.015, meta: "非周期彗星", desc: "2007年に非常に明るくなり、壮大な尾を見せた大彗星。" },
-                { name: "NEAT C/2001 Q4", color: 0x88FFDD, size: 150, a: 2800000, e: 0.9998, i: 99, speed: 0.018, meta: "非周期彗星", desc: "2004年に肉眼で見える明るさになった彗星。" }
+                { name: "1P/ハレー", color: 0x00FFFF, size: 160, a: 2400000, e: 0.967, i: 162, speed: 0.08, meta: "短周期彗星", desc: "約76年周期で回帰する最も有名な彗星。" },
+                { name: "2P/エンケ", color: 0xCCFFCC, size: 120, a: 720000, e: 0.848, i: 11, speed: 0.15, meta: "短周期彗星", desc: "周期3.3年。おうし座流星群の母天体。" },
+                { name: "67P/C-G", color: 0xAAAAAA, size: 140, a: 1320000, e: 0.641, i: 7, speed: 0.1, meta: "短周期彗星", desc: "ロゼッタ探査機が着陸機フィラエを送り込んだ。" },
+                { name: "153P/池谷・張", color: 0xCCFFFF, size: 180, a: 9000000, e: 0.990, i: 28, speed: 0.03, meta: "長周期彗星", desc: "2002年に発見された明るい彗星。" },
+                { name: "C/1995 O1", color: 0xFFFFFF, size: 240, a: 15000000, e: 0.995, i: 89, speed: 0.02, meta: "ヘール・ボップ彗星", desc: "1997年に肉眼で長期間観測された大彗星。" },
+                { name: "マックノート C/2006 P1", color: 0xFFDD88, size: 200, a: 30000000, e: 0.9999, i: 77, speed: 0.015, meta: "非周期彗星", desc: "2007年に非常に明るくなり、壮大な尾を見せた大彗星。" },
+                { name: "NEAT C/2001 Q4", color: 0x88FFDD, size: 150, a: 28000000, e: 0.9998, i: 99, speed: 0.018, meta: "非周期彗星", desc: "2004年に肉眼で見える明るさになった彗星。" }
             ],
             satellites: [
-                { name: "ISS", parent: "地球", color: 0xFFFFFF, size: 100, dist: 1500, speed: 1.2, meta: "国際宇宙ステーション", desc: "高度約400kmを秒速約7.7kmで周回する有人宇宙施設。" }
+                { name: "ISS", parent: "地球", color: 0xFFFFFF, size: 100, dist: 15000, speed: 1.2, meta: "国際宇宙ステーション", desc: "高度約400kmを秒速約7.7kmで周回する有人宇宙施設。" }
             ],
             stars: [
                 { name: "シリウス", color: 0xCCDDFF, size: 9000, pos: [-1200000, -300000, 1600000], meta: "おおいぬ座 α星", desc: "全天第1位の輝星。地球から約8.6光年. 白く輝く主系列星。" },
@@ -289,25 +294,124 @@ app.get('/', (c) => {
         };
 
         function generateFullSatellites() {
-            const moonsRaw = {
-                "地球": ["月"],
-                "火星": ["フォボス", "ダイモス"],
-                "木星": ["イオ", "エウロパ", "ガニメデ", "カリスト", "アマルテア", "ヒマリア", "テーベ", "メティス", "アドラステア"],
-                "土星": ["ミマス", "エンケラドゥス", "テティス", "ディオネ", "レア", "タイタン", "ヒペリオン", "アイアペトゥス", "ヤヌス", "エピメテウス"],
-                "天王星": ["アリエル", "ウンブリエル", "チタニア", "オベロン", "ミランダ", "パック"],
-                "海王星": ["トリトン", "プロテウス", "ネレイド", "ラリッサ"],
-                "冥王星": ["カロン", "ニクス", "ヒドラ"]
+            // 衛星軌道の基準距離（親惑星サイズの約10倍から始め、各衛星ごとに広く間隔を開ける）
+            // distStep を大きくして衛星同士が密集しないようにする
+            const moonsData = {
+                "地球": {
+                    named: ["月"],
+                    sizes: { "月": 200 },
+                    distStart: 30000, distStep: 15000
+                },
+                "火星": {
+                    named: ["フォボス", "ダイモス"],
+                    sizes: {},
+                    distStart: 12000, distStep: 8000
+                },
+                "木星": {
+                    // 95個: 主要4個（ガリレオ衛星）+ 内側群 + 外側群（不規則衛星）
+                    named: [
+                        "メティス", "アドラステア", "アマルテア", "テーベ",
+                        "イオ", "エウロパ", "ガニメデ", "カリスト",
+                        "テミスト", "レダ", "ヒマリア", "リュシテア", "エラーラ",
+                        "ディア", "カルポ", "ユーポリー", "ムニメ", "ヘゲモネ",
+                        "アナンケ", "シネーペ", "アオイデ", "タイゲテ", "カルメ",
+                        "カリキオレ", "パシテー", "ヘルミッペ", "エイレーネ", "フィロフロシュネ",
+                        "オルトサイ", "エウリドメ", "アルケ", "ハーポリュクラ", "ユードイアー",
+                        "スポンデー", "パシパエ", "マグナエ", "キルケー", "イオカステ",
+                        "ヘルセ", "フィラー", "エウリノメ", "ヘゲモネ2", "アイトネ",
+                        "エウアンテ", "ユーファメ", "ヘリケ", "カルメ小", "パンドイア",
+                        "フィロフロシュネ2", "ムニメ2", "テルクシノエ", "ポンティア", "エイレーネ2",
+                        "マグナエ2", "カリロエ", "テミスト2", "ゴンゴ", "アフロディテ",
+                        "エウカランテ", "カリュベ", "マクエト", "エウリドメ2", "ステュクス",
+                        "ポセイドン", "フサ", "ユーポリー2", "プラクシディケ", "イアンケ",
+                        "ヒミリア", "オルソソポ", "エルサ", "パンドイア2", "キャリロエ2",
+                        "アイタス", "ジェウス", "ユドロ", "キュレーネ", "アイアコス",
+                        "ダクテュロス", "カリッポ", "ユーリュノメ", "テウタス", "ユーピテル",
+                        "ユーケラデ", "マクロ", "ハーモニア", "フィリア", "フィロティス",
+                        "シアン", "アルビオリクス", "ヘタイラ", "カッリコレ", "ユーポリー3",
+                        "プロメテウス", "エコー", "ディオーネ小"
+                    ],
+                    sizes: { "イオ": 480, "エウロパ": 420, "ガニメデ": 560, "カリスト": 500, "アマルテア": 200 },
+                    distStart: 20000, distStep: 6000
+                },
+                "土星": {
+                    // 146個
+                    named: [
+                        "S/2009 S 1", "パン", "ダフニス", "アトラス", "プロメテウス", "パンドラ",
+                        "エピメテウス", "ヤヌス", "ミマス", "メトーネ", "アナテー", "パレーネ",
+                        "エンケラドゥス", "テティス", "テレスト", "カリプソ", "ディオネ", "ヘレーネ",
+                        "ポリデウケス", "レア", "タイタン", "ヒペリオン", "アイアペトゥス", "キウィオ",
+                        "イジラク", "タルコ", "アルバイオリクス", "エリアポ", "スカジ", "タルボス",
+                        "グレイプ", "ハティ", "ベストラ", "ファルバウティ", "スルトゥル", "キリキ",
+                        "ジャルンサクサ", "ムンディルファリ", "ナリ", "ログ", "フォルニョート",
+                        "ハイル", "エジョルグ", "ベルゲルミル", "ジャルンサクサ2", "スカジ2",
+                        "フェンリル", "スットゥングル", "ティリル", "グンロズ", "ジムル",
+                        "ベルゲルミル2", "アングルボーダ", "スカール", "グレイプ2", "ロゲ",
+                        "フォルバウティ", "トリムル", "ガルマ", "アエゲル", "ベリ",
+                        "グリール", "ハティ2", "キウィオ2", "イ", "ヒロク", "ムンディル",
+                        "ベルゲルミル3", "テリグトゥス", "ナリ2", "スカジ3", "フォルニョート2",
+                        "ロゲ2", "ベルゲルミル4", "エジョルグ2", "アエゲル2", "イジラク2",
+                        "アルバイオリクス2", "キリキ2", "グンロズ2", "タルボス2", "エリアポ2",
+                        "タルコ2", "スカジ4", "ジャルンサクサ3", "ムンディルファリ2", "ナリ3",
+                        "ログ2", "フォルニョート3", "ハイル2", "フェンリル2", "スットゥングル2",
+                        "ティリル2", "グンロズ3", "ジムル2", "ベルゲルミル5", "フォルニョート4",
+                        "ジャルンサクサ4", "スカジ5", "アングルボーダ2", "スカール2", "グレイプ3",
+                        "フォルバウティ2", "トリムル2", "ガルマ2", "アエゲル3", "ベリ2",
+                        "グリール2", "ハティ3", "テリグトゥス2", "ヒロク2", "ムンディル2",
+                        "S/2004 S 12", "S/2004 S 13", "S/2004 S 17", "S/2006 S 1", "S/2006 S 3",
+                        "S/2007 S 2", "S/2007 S 3", "S/2019 S 1", "S/2019 S 2", "S/2019 S 3",
+                        "S/2019 S 4", "S/2019 S 5", "S/2019 S 6", "S/2019 S 7", "S/2019 S 8",
+                        "S/2019 S 9", "S/2019 S 10", "S/2019 S 11", "S/2019 S 12", "S/2019 S 13",
+                        "S/2019 S 14", "S/2019 S 15", "S/2019 S 16", "S/2019 S 17", "S/2019 S 18",
+                        "S/2019 S 19", "S/2019 S 20", "S/2019 S 21", "S/2020 S 1", "S/2021 S 1"
+                    ],
+                    sizes: { "タイタン": 560, "レア": 300, "ディオネ": 260, "テティス": 250, "エンケラドゥス": 220, "ミマス": 180, "アイアペトゥス": 290, "ヒペリオン": 200 },
+                    distStart: 18000, distStep: 4000
+                },
+                "天王星": {
+                    // 28個
+                    named: [
+                        "コルデリア", "オフェリア", "ビアンカ", "クレッシダ", "デスデモナ",
+                        "ジュリエット", "ポーシア", "ロザリンド", "クーピッド", "ベリンダ",
+                        "パック", "マブ", "ミランダ", "アリエル", "ウンブリエル",
+                        "チタニア", "オベロン", "フランシスコ", "カリバン", "ステファノ",
+                        "トリンキュロ", "シコラクス", "マーガレット", "プロスペロ", "セティボス",
+                        "フェルディナンド", "S/2001 U 1", "S/2023 U 1"
+                    ],
+                    sizes: { "チタニア": 340, "オベロン": 330, "アリエル": 280, "ウンブリエル": 270, "ミランダ": 200 },
+                    distStart: 15000, distStep: 5500
+                },
+                "海王星": {
+                    // 16個
+                    named: [
+                        "ナイアード", "タラッサ", "デスピナ", "ガラテア", "ラリッサ",
+                        "ヒッポカンプ", "プロテウス", "トリトン", "ネレイド", "ハリメデ",
+                        "サオ", "ラオメデイア", "プサマテ", "ネソ", "S/2004 N 1",
+                        "S/2021 N 1"
+                    ],
+                    sizes: { "トリトン": 480, "プロテウス": 220, "ネレイド": 180, "ラリッサ": 150 },
+                    distStart: 14000, distStep: 6000
+                },
+                "冥王星": {
+                    named: ["カロン", "ニクス", "ヒドラ", "ケルベロス", "スティクス"],
+                    sizes: { "カロン": 240 },
+                    distStart: 10000, distStep: 8000
+                }
             };
-            Object.entries(moonsRaw).forEach(([planet, moons]) => {
-                moons.forEach((name, i) => {
-                    const distBase = 200 + (i * 120);
+
+            Object.entries(moonsData).forEach(([planet, cfg]) => {
+                cfg.named.forEach((name, i) => {
+                    const dist = cfg.distStart + i * cfg.distStep;
+                    const baseSize = cfg.sizes[name] || (i < 4 ? 90 : 60);
                     DATA.satellites.push({
-                        name: name, parent: planet, color: 0xDDDDDD,
-                        size: name === "月" ? 200 : (name === "ガニメデ" || name === "タイタン" ? 500 : 120),
-                        dist: distBase * 15.0,
-                        speed: 0.15 * Math.pow(100/distBase, 0.5),
+                        name: name,
+                        parent: planet,
+                        color: 0xCCCCCC,
+                        size: baseSize,
+                        dist: dist,
+                        speed: 0.12 * Math.pow(cfg.distStart / dist, 0.5),
                         meta: planet + "の衛星",
-                        desc: name + "は" + planet + "の周りを回る主要な衛星の一つです。"
+                        desc: name + "は" + planet + "の周りを公転する衛星です。"
                     });
                 });
             });
@@ -367,7 +471,7 @@ app.get('/', (c) => {
         function init() {
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 10, 50000000000);
-            camera.position.set(200000, 100000, 200000);
+            camera.position.set(2000000, 1000000, 2000000);
             renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
@@ -476,12 +580,13 @@ app.get('/', (c) => {
             const count = 870000;
             const positions = new Float32Array(count * 3);
             const colors = new Float32Array(count * 3);
-            const innerRadius = 126000;
-            const outerRadius = 198000;
+            // 惑星スケール×10に合わせてベルトも×10
+            const innerRadius = 1260000;
+            const outerRadius = 1980000;
             for (let i = 0; i < count; i++) {
                 const angle = Math.random() * Math.PI * 2;
                 const dist = innerRadius + (Math.random() * (outerRadius - innerRadius));
-                const spread = 400;
+                const spread = 4000;
                 positions[i * 3] = Math.cos(angle) * dist + (Math.random() - 0.5) * spread;
                 positions[i * 3 + 1] = (Math.random() - 0.5) * spread * 0.5;
                 positions[i * 3 + 2] = Math.sin(angle) * dist + (Math.random() - 0.5) * spread;
@@ -674,9 +779,9 @@ app.get('/', (c) => {
             else if (obj.type === 'galaxy' || obj.type === 'milkyway') zoomDistance = size * 4;
             else if (obj.type === 'star') zoomDistance = size * 10;
             else if (obj.type === 'solar' && obj.data.dist === 0) zoomDistance = size * 10;
-            else if (obj.type === 'satellite') zoomDistance = 5000;
-            else if (size < 20) zoomDistance = 5000;
-            else zoomDistance = size * 20;
+            else if (obj.type === 'satellite') zoomDistance = size * 80;
+            else if (size < 100) zoomDistance = 30000;
+            else zoomDistance = size * 80;
             document.getElementById('info-name').innerText = obj.data.name;
             document.getElementById('info-meta').innerText = obj.data.meta || "天体構造";
             document.getElementById('info-desc').innerText = obj.data.desc || "詳細情報なし";
@@ -795,10 +900,10 @@ app.get('/', (c) => {
                 if (v.z > 1) { label.style.display = 'none'; return; }
                 const x = (v.x * .5 + .5) * window.innerWidth;
                 const y = (v.y * -.5 + .5) * window.innerHeight;
-                let limit = 100000000;
-                if (p.type === 'satellite') limit = 10000000;
-                else if (p.type === 'asteroid') limit = 30000000;
-                else if (p.type === 'others') limit = 200000000;
+                let limit = 1000000000;
+                if (p.type === 'satellite') limit = 50000000;
+                else if (p.type === 'asteroid') limit = 300000000;
+                else if (p.type === 'others') limit = 2000000000;
                 else if (p.type === 'cosmic') limit = 100000000000;
                 else if (p.type === 'supercluster') limit = 50000000000;
                 else if (p.type === 'cluster') limit = 10000000000;
