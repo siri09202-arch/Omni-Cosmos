@@ -67,7 +67,8 @@ app.get('/', (c) => {
         <button class="celestial-btn" onclick="switchCategory('dwarfs')" id="btn-dwarfs">準惑星</button>
         <button class="celestial-btn" onclick="switchCategory('asteroids')" id="btn-asteroids">小惑星</button>
         <button class="celestial-btn" onclick="switchCategory('tnos')" id="btn-tnos">地球外縁天体</button>
-        <button class="celestial-btn" onclick="switchCategory('comets')" id="btn-comets">彗星</button>
+        <button class="celestial-btn" onclick="switchCategory('periodic_comets')" id="btn-periodic_comets">周期彗星</button>
+        <button class="celestial-btn" onclick="switchCategory('aperiodic_comets')" id="btn-aperiodic_comets">非周期彗星</button>
         <button class="celestial-btn" onclick="switchCategory('satellites')" id="btn-satellites">衛星</button>
         <button class="celestial-btn" onclick="switchCategory('stars')" id="btn-stars">恒星カタログ</button>
         <button class="celestial-btn" onclick="switchCategory('milkyway')" id="btn-milkyway">銀河系詳細</button>
@@ -141,47 +142,154 @@ app.get('/', (c) => {
         const DATA = {
             solar: [
                 { name: "太陽", color: 0xFFDD44, size: 7500, dist: 0, speed: 0, meta: "恒星 (G2V)", desc: "太陽系の中心。全質量の99.8%を占める。", type: "sun" },
-                { name: "水星", color: 0xAAAAAA, size: 400, dist: 390000, speed: 0.047, meta: "惑星", desc: "太陽に最も近い、クレーターだらけの惑星。", type: "rocky" },
-                { name: "金星", color: 0xFFCC88, size: 700, dist: 570000, speed: 0.035, meta: "惑星", desc: "厚い硫酸の雲に覆われた灼熱の惑星。", type: "cloudy" },
-                { name: "地球", color: 0x2266FF, size: 760, dist: 810000, speed: 0.029, meta: "惑星", desc: "生命が確認されている唯一の天体。", type: "earth" },
-                { name: "火星", color: 0xFF5533, size: 560, dist: 1080000, speed: 0.024, meta: "惑星", desc: "酸化鉄の影響で赤く見える惑星。", type: "rocky" },
-                { name: "木星", color: 0xE6B18A, size: 2200, dist: 2100000, speed: 0.013, meta: "ガス巨大惑星", desc: "太陽系最大の惑星。大赤斑がある。", type: "gas" },
-                { name: "土星", color: 0xF2E1AC, size: 2000, dist: 2880000, speed: 0.009, meta: "ガス巨大惑星", desc: "氷の粒子からなる美しい環を持つ。", type: "gas", hasRing: true, ringColor: 0xAD9F7B, ringInner: 1.4, ringOuter: 2.3 },
-                { name: "天王星", color: 0xBBE1E4, size: 1200, dist: 3720000, speed: 0.006, meta: "氷巨大惑星", desc: "自転軸がほぼ横倒しになっている。", type: "gas", hasRing: true, ringColor: 0x88AAAA, ringInner: 1.8, ringOuter: 1.9 },
-                { name: "海王星", color: 0x4466FF, size: 1200, dist: 4500000, speed: 0.005, meta: "氷巨大惑星", desc: "強風が吹き荒れる青い惑星。", type: "gas" }
+                { name: "水星", color: 0xAAAAAA, size: 400, dist: 527000, speed: 0.047, meta: "惑星", desc: "太陽に最も近い、クレーターだらけの惑星。", type: "rocky" },
+                { name: "金星", color: 0xFFCC88, size: 700, dist: 770000, speed: 0.035, meta: "惑星", desc: "厚い硫酸の雲に覆われた灼熱の惑星。", type: "cloudy" },
+                { name: "地球", color: 0x2266FF, size: 760, dist: 1094000, speed: 0.029, meta: "惑星", desc: "生命が確認されている唯一の天体。", type: "earth" },
+                { name: "火星", color: 0xFF5533, size: 560, dist: 1458000, speed: 0.024, meta: "惑星", desc: "酸化鉄の影響で赤く見える惑星。", type: "rocky" },
+                { name: "木星", color: 0xE6B18A, size: 2200, dist: 2835000, speed: 0.013, meta: "ガス巨大惑星", desc: "太陽系最大の惑星。大赤斑がある。", type: "gas" },
+                { name: "土星", color: 0xF2E1AC, size: 2000, dist: 3888000, speed: 0.009, meta: "ガス巨大惑星", desc: "氷の粒子からなる美しい環を持つ。", type: "gas", hasRing: true, ringColor: 0xAD9F7B, ringInner: 1.4, ringOuter: 2.3 },
+                { name: "天王星", color: 0xBBE1E4, size: 1200, dist: 5022000, speed: 0.006, meta: "氷巨大惑星", desc: "自転軸がほぼ横倒しになっている。", type: "gas", hasRing: true, ringColor: 0x88AAAA, ringInner: 1.8, ringOuter: 1.9 },
+                { name: "海王星", color: 0x4466FF, size: 1200, dist: 6075000, speed: 0.005, meta: "氷巨大惑星", desc: "強風が吹き荒れる青い惑星。", type: "gas" }
             ],
             dwarfs: [
-                { name: "冥王星", color: 0xDFCAB5, size: 300, dist: 5700000, speed: 0.004, meta: "準惑星", desc: "カイパーベルト最大の天体。かつて第9惑星とされていた。", type: "rocky" },
-                { name: "ケレス", color: 0x999999, size: 240, dist: 1680000, speed: 0.017, meta: "準惑星", desc: "火星と木星の間の小惑星帯にある唯一の準惑星。", type: "rocky" },
-                { name: "エリス", color: 0xEEEEEE, size: 300, dist: 7800000, speed: 0.002, meta: "準惑星", desc: "冥王星と同程度の質量を持つ、散乱円盤天体の準惑星。", type: "rocky" },
-                { name: "マケマケ", color: 0xCC8866, size: 220, dist: 6600000, speed: 0.003, meta: "準惑星", desc: "イースター島の創造神にちなんで名付けられた氷の準惑星。", type: "rocky" },
-                { name: "ハウメア", color: 0xFFFFFF, size: 200, dist: 6300000, speed: 0.0035, meta: "準惑星", desc: "高速自転によりラグビーボールのように引き伸ばされた形状をしている。", type: "rocky" }
+                { name: "冥王星", color: 0xDFCAB5, size: 300, dist: 7695000, speed: 0.004, meta: "準惑星", desc: "カイパーベルト最大の天体。かつて第9惑星とされていた。", type: "rocky" },
+                { name: "ケレス", color: 0x999999, size: 240, dist: 2268000, speed: 0.017, meta: "準惑星", desc: "火星と木星の間の小惑星帯にある唯一の準惑星。", type: "rocky" },
+                { name: "エリス", color: 0xEEEEEE, size: 300, dist: 10530000, speed: 0.002, meta: "準惑星", desc: "冥王星と同程度の質量を持つ、散乱円盤天体の準惑星。", type: "rocky" },
+                { name: "マケマケ", color: 0xCC8866, size: 220, dist: 8910000, speed: 0.003, meta: "準惑星", desc: "イースター島の創造神にちなんで名付けられた氷の準惑星。", type: "rocky" },
+                { name: "ハウメア", color: 0xFFFFFF, size: 200, dist: 8505000, speed: 0.0035, meta: "準惑星", desc: "高速自転によりラグビーボールのように引き伸ばされた形状をしている。", type: "rocky" }
             ],
             asteroids: [
-                { name: "ベスタ", color: 0xDDDDCC, size: 180, dist: 1560000, speed: 0.019, meta: "小惑星", desc: "小惑星帯（メインベルト）で最も明るく見える岩石天体。", type: "rocky" },
-                { name: "パラス", color: 0xAACCFF, size: 180, dist: 1650000, speed: 0.018, meta: "小惑星", desc: "小惑星帯で3番目に大きい。軌道傾斜角が大きいのが特徴。", type: "rocky" },
-                { name: "ヒギエア", color: 0x888888, size: 160, dist: 1860000, speed: 0.016, meta: "小惑星", desc: "炭素質で黒っぽい、小惑星帯で4番目に大きい天体。", type: "rocky" },
-                { name: "リュウグウ", color: 0x444444, size: 60, dist: 840000, speed: 0.028, meta: "地球近傍小惑星", desc: "「はやぶさ2」が探査を行ったC型小惑星。", type: "rocky" },
-                { name: "イトカワ", color: 0xAAAA99, size: 40, dist: 900000, speed: 0.027, meta: "地球近傍小惑星", desc: "「はやぶさ」が探査を行ったS型小惑星。ラッコのような形。", type: "rocky" },
-                { name: "ベンヌ", color: 0x555566, size: 60, dist: 870000, speed: 0.0275, meta: "地球近傍小惑星", desc: "OSIRIS-RExがサンプルリターンを行った小惑星。", type: "rocky" }
+                { name: "ベスタ", color: 0xDDDDCC, size: 180, dist: 2106000, speed: 0.019, meta: "小惑星", desc: "小惑星帯（メインベルト）で最も明るく見える岩石天体。", type: "rocky" },
+                { name: "パラス", color: 0xAACCFF, size: 180, dist: 2228000, speed: 0.018, meta: "小惑星", desc: "小惑星帯で3番目に大きい。軌道傾斜角が大きいのが特徴。", type: "rocky" },
+                { name: "ヒギエア", color: 0x888888, size: 160, dist: 2511000, speed: 0.016, meta: "小惑星", desc: "炭素質で黒っぽい、小惑星帯で4番目に大きい天体。", type: "rocky" },
+                { name: "リュウグウ", color: 0x444444, size: 60, dist: 1134000, speed: 0.028, meta: "地球近傍小惑星", desc: "「はやぶさ2」が探査を行ったC型小惑星。", type: "rocky" },
+                { name: "イトカワ", color: 0xAAAA99, size: 40, dist: 1215000, speed: 0.027, meta: "地球近傍小惑星", desc: "「はやぶさ」が探査を行ったS型小惑星。ラッコのような形。", type: "rocky" },
+                { name: "ベンヌ", color: 0x555566, size: 60, dist: 1175000, speed: 0.0275, meta: "地球近傍小惑星", desc: "OSIRIS-RExがサンプルリターンを行った小惑星。", type: "rocky" }
             ],
             tnos: [
-                { name: "セドナ", color: 0xFF6644, size: 280, dist: 18000000, speed: 0.0005, meta: "分離天体", desc: "極めて遠方を公転する、赤みがかった謎多き天体。", type: "rocky" },
-                { name: "ゴンゴン", color: 0xDD6666, size: 260, dist: 9000000, speed: 0.0018, meta: "散乱円盤天体", desc: "2007 OR10としても知られる、赤色で大型の天体。", type: "rocky" },
-                { name: "クワオアー", color: 0x887766, size: 240, dist: 6900000, speed: 0.0028, meta: "キュビワノ族", desc: "真円に近い軌道を持つ大型のカイパーベルト天体。", type: "rocky" },
-                { name: "オルクス", color: 0xAAAAAA, size: 220, dist: 5640000, speed: 0.004, meta: "冥王星族", desc: "冥王星と似た軌道をもち、「アンチ・プルート」とも呼ばれる。", type: "rocky" }
+                { name: "セドナ", color: 0xFF6644, size: 280, dist: 24300000, speed: 0.0005, meta: "分離天体", desc: "極めて遠方を公転する、赤みがかった謎多き天体。", type: "rocky" },
+                { name: "ゴンゴン", color: 0xDD6666, size: 260, dist: 12150000, speed: 0.0018, meta: "散乱円盤天体", desc: "2007 OR10としても知られる、赤色で大型の天体。", type: "rocky" },
+                { name: "クワオアー", color: 0x887766, size: 240, dist: 9315000, speed: 0.0028, meta: "キュビワノ族", desc: "真円に近い軌道を持つ大型のカイパーベルト天体。", type: "rocky" },
+                { name: "オルクス", color: 0xAAAAAA, size: 220, dist: 7614000, speed: 0.004, meta: "冥王星族", desc: "冥王星と似た軌道をもち、「アンチ・プルート」とも呼ばれる。", type: "rocky" }
             ],
-            comets: [
-                { name: "1P/ハレー", color: 0x00FFFF, size: 160, a: 2400000, e: 0.967, i: 162, speed: 0.08, meta: "短周期彗星", desc: "約76年周期で回帰する最も有名な彗星。" },
-                { name: "2P/エンケ", color: 0xCCFFCC, size: 120, a: 720000, e: 0.848, i: 11, speed: 0.15, meta: "短周期彗星", desc: "周期3.3年。おうし座流星群の母天体。" },
-                { name: "67P/C-G", color: 0xAAAAAA, size: 140, a: 1320000, e: 0.641, i: 7, speed: 0.1, meta: "短周期彗星", desc: "ロゼッタ探査機が着陸機フィラエを送り込んだ。" },
-                { name: "153P/池谷・張", color: 0xCCFFFF, size: 180, a: 9000000, e: 0.990, i: 28, speed: 0.03, meta: "長周期彗星", desc: "2002年に発見された明るい彗星。" },
-                { name: "C/1995 O1", color: 0xFFFFFF, size: 240, a: 15000000, e: 0.995, i: 89, speed: 0.02, meta: "ヘール・ボップ彗星", desc: "1997年に肉眼で長期間観測された大彗星。" },
-                { name: "マックノート C/2006 P1", color: 0xFFDD88, size: 200, a: 30000000, e: 0.9999, i: 77, speed: 0.015, meta: "非周期彗星", desc: "2007年に非常に明るくなり、壮大な尾を見せた大彗星。" },
-                { name: "NEAT C/2001 Q4", color: 0x88FFDD, size: 150, a: 28000000, e: 0.9998, i: 99, speed: 0.018, meta: "非周期彗星", desc: "2004年に肉眼で見える明るさになった彗星。" }
+            // 旧comets → periodic_comets / aperiodic_comets に統合
+            comets: [], // 後方互換のため残す（空）
+            // ---- 番号登録周期彗星 (1P〜448P + 特筆短周期D) ----
+            periodic_comets: [
+                { name: "1P ハレー彗星", color: 0x00FFFF, size: 160, a: 2400000, e: 0.967, speed: 0.08, meta: "短周期彗星", desc: "約76年周期で回帰する最も有名な彗星。エドモンド・ハレーが予測した。" },
+                { name: "2P エンケ彗星", color: 0xCCFFCC, size: 120, a: 720000, e: 0.848, speed: 0.15, meta: "短周期彗星", desc: "周期3.3年。おうし座流星群の母天体。" },
+                { name: "3D ビエラ彗星", color: 0xAABBCC, size: 100, a: 1200000, e: 0.756, speed: 0.09, meta: "消滅彗星", desc: "1846年に二つに分裂し、後に消滅した彗星。" },
+                { name: "4P フェイ彗星", color: 0xBBCCDD, size: 110, a: 1050000, e: 0.578, speed: 0.11, meta: "短周期彗星", desc: "周期約7.5年の木星族彗星。" },
+                { name: "5D ブローセン彗星", color: 0xCCDDEE, size: 100, a: 900000, e: 0.531, speed: 0.12, meta: "消滅彗星", desc: "19世紀に発見されたが現在は見失われている彗星。" },
+                { name: "6P ダレスト彗星", color: 0xAADDCC, size: 110, a: 1020000, e: 0.614, speed: 0.11, meta: "短周期彗星", desc: "1851年発見。周期約6.5年。" },
+                { name: "7P ポンス・ヴィネッケ彗星", color: 0xBBEEDD, size: 120, a: 900000, e: 0.636, speed: 0.12, meta: "短周期彗星", desc: "やぎ座流星群の母天体候補とされる。" },
+                { name: "8P タットル彗星", color: 0xCCEEFF, size: 130, a: 1500000, e: 0.820, speed: 0.08, meta: "短周期彗星", desc: "うるしとも座流星群の母天体。周期約13.6年。" },
+                { name: "9P テンペル第1彗星", color: 0xDDEEFF, size: 130, a: 1080000, e: 0.517, speed: 0.10, meta: "短周期彗星", desc: "NASAのDeep Impact探査機が衝突体を撃ち込んだ。" },
+                { name: "10P テンペル第2彗星", color: 0xCCDDEE, size: 120, a: 900000, e: 0.536, speed: 0.11, meta: "短周期彗星", desc: "周期約5.4年の木星族彗星。" },
+                { name: "11P テンペル・スイフト・LINEAR彗星", color: 0xBBCCDD, size: 110, a: 930000, e: 0.540, speed: 0.11, meta: "短周期彗星", desc: "複数の発見者に由来する名を持つ木星族彗星。" },
+                { name: "12P ポンス・ブルックス彗星", color: 0xFFEECC, size: 180, a: 4500000, e: 0.955, speed: 0.04, meta: "ハレー型彗星", desc: "周期約71年。2024年に回帰した大型の彗星。" },
+                { name: "13P オルバース彗星", color: 0xEEDDCC, size: 140, a: 4200000, e: 0.930, speed: 0.05, meta: "ハレー型彗星", desc: "周期約69年。1815年に発見。" },
+                { name: "14P ヴォルフ彗星", color: 0xDDCCBB, size: 120, a: 1050000, e: 0.406, speed: 0.10, meta: "短周期彗星", desc: "周期約8.3年の木星族彗星。" },
+                { name: "15P フィンレー彗星", color: 0xCCBBAA, size: 110, a: 900000, e: 0.699, speed: 0.11, meta: "短周期彗星", desc: "周期約6.7年の木星族彗星。" },
+                { name: "16P ブルックス第2彗星", color: 0xBBAA99, size: 110, a: 900000, e: 0.491, speed: 0.12, meta: "短周期彗星", desc: "1889年に木星に極接近して分裂した歴史がある。" },
+                { name: "17P ホームズ彗星", color: 0xFFCC88, size: 140, a: 1950000, e: 0.432, speed: 0.07, meta: "短周期彗星", desc: "2007年に突如100万倍以上増光し、肉眼で容易に見えた。" },
+                { name: "18D パーライン・ムルコス彗星", color: 0xAABBCC, size: 100, a: 1080000, e: 0.608, speed: 0.10, meta: "消滅彗星", desc: "現在は見失われた短周期彗星。" },
+                { name: "19P ボレリー彗星", color: 0xBBCCDD, size: 120, a: 1020000, e: 0.623, speed: 0.11, meta: "短周期彗星", desc: "Deep Space 1探査機が接近観測した。" },
+                { name: "20D ヴェストファール彗星", color: 0xCCDDEE, size: 110, a: 3000000, e: 0.920, speed: 0.06, meta: "消滅彗星", desc: "見失われたハレー型彗星。" },
+                { name: "21P ジャコビニ・ツィナー彗星", color: 0xDDEEFF, size: 120, a: 1050000, e: 0.706, speed: 0.10, meta: "短周期彗星", desc: "りゅう座流星群の母天体。" },
+                { name: "22P コプフ彗星", color: 0xCCDDFF, size: 110, a: 1050000, e: 0.544, speed: 0.10, meta: "短周期彗星", desc: "周期約6.4年の木星族彗星。" },
+                { name: "23P ブローセン・メトカーフ彗星", color: 0xBBCCEE, size: 130, a: 3300000, e: 0.972, speed: 0.05, meta: "ハレー型彗星", desc: "周期約70年のハレー型彗星。" },
+                { name: "24P ショーマス彗星", color: 0xAABBDD, size: 110, a: 1200000, e: 0.578, speed: 0.09, meta: "短周期彗星", desc: "周期約8.9年の木星族彗星。" },
+                { name: "26P グリッグ・シェレルップ彗星", color: 0xBBCCCC, size: 120, a: 2400000, e: 0.664, speed: 0.07, meta: "短周期彗星", desc: "ジャコビニ・ツィナー彗星と異なる流星群の母天体候補。" },
+                { name: "27P クロンメリン彗星", color: 0xCCDDCC, size: 130, a: 3000000, e: 0.919, speed: 0.06, meta: "ハレー型彗星", desc: "周期約28年。" },
+                { name: "28P ネウイミン第1彗星", color: 0xDDEECC, size: 140, a: 4800000, e: 0.775, speed: 0.04, meta: "短周期彗星", desc: "巨大な核を持つと推定される彗星。" },
+                { name: "29P シュワスマン・ワハマン第1彗星", color: 0xEEFFCC, size: 150, a: 4500000, e: 0.044, speed: 0.04, meta: "特異彗星", desc: "ほぼ円形の軌道を持ち、頻繁にアウトバーストを起こすケンタウルス族の天体。" },
+                { name: "35P ハーシェル・リゴレー彗星", color: 0xFFEECC, size: 130, a: 3600000, e: 0.974, speed: 0.05, meta: "ハレー型彗星", desc: "周期約155年の長周期に近い彗星。" },
+                { name: "41P タットル・ジャコビニ・クレサーク彗星", color: 0xCCFFFF, size: 110, a: 900000, e: 0.462, speed: 0.12, meta: "短周期彗星", desc: "2017年に地球に大接近し明るくなった。" },
+                { name: "45P 本田・ムルコス・パイドゥシャーコヴァー彗星", color: 0xFFFFCC, size: 110, a: 600000, e: 0.823, speed: 0.16, meta: "短周期彗星", desc: "1948年に本田實らが発見した。" },
+                { name: "46P ワータネン彗星", color: 0xCCFFCC, size: 120, a: 900000, e: 0.650, speed: 0.12, meta: "短周期彗星", desc: "ロゼッタ探査機の当初の目標天体。2018年に大接近。" },
+                { name: "55P テンペル・タットル彗星", color: 0xFFCCFF, size: 130, a: 2700000, e: 0.906, speed: 0.06, meta: "ハレー型彗星", desc: "しし座流星群の母天体。周期約33年。" },
+                { name: "67P チュリュモフ・ゲラシメンコ彗星", color: 0xAAAAAA, size: 140, a: 1320000, e: 0.641, speed: 0.10, meta: "短周期彗星", desc: "ロゼッタ探査機が着陸機フィラエを送り込んだ。" },
+                { name: "70P 小島彗星", color: 0xCCEEFF, size: 110, a: 1050000, e: 0.580, speed: 0.10, meta: "短周期彗星", desc: "1970年に小島信久が発見した日本人発見彗星。" },
+                { name: "81P ヴィルト第2彗星", color: 0xDDEEFF, size: 120, a: 1140000, e: 0.537, speed: 0.10, meta: "短周期彗星", desc: "スターダスト探査機が塵サンプルを採取して帰還した。" },
+                { name: "95P キロン彗星", color: 0xCCCCFF, size: 180, a: 5400000, e: 0.379, speed: 0.04, meta: "ケンタウルス族", desc: "小惑星と彗星両方の性質を持つケンタウルス族天体。" },
+                { name: "96P マックホルツ第1彗星", color: 0xFFDDCC, size: 130, a: 1050000, e: 0.959, speed: 0.10, meta: "短周期彗星", desc: "化学組成が他の彗星と大きく異なり、起源が謎とされる。" },
+                { name: "103P ハートレー第2彗星", color: 0xCCFFEE, size: 110, a: 900000, e: 0.694, speed: 0.12, meta: "短周期彗星", desc: "EPOXI探査機（旧Deep Impact）が接近観測した。" },
+                { name: "109P スイフト・タットル彗星", color: 0xFFCCCC, size: 200, a: 4500000, e: 0.963, speed: 0.04, meta: "ハレー型彗星", desc: "ペルセウス座流星群の母天体。核の直径約26km。" },
+                { name: "144P 串田彗星", color: 0xFFEEDD, size: 120, a: 1500000, e: 0.638, speed: 0.08, meta: "短周期彗星", desc: "1994年に串田嘉男が発見した日本人発見彗星。" },
+                { name: "153P 池谷・張彗星", color: 0xCCFFFF, size: 160, a: 9000000, e: 0.990, speed: 0.03, meta: "長周期彗星", desc: "2002年に発見された明るい彗星。池谷薫と張大慶が共同発見。" },
+                { name: "177P バーナード彗星", color: 0xFFDDEE, size: 150, a: 3600000, e: 0.952, speed: 0.05, meta: "ハレー型彗星", desc: "1889年にバーナードが発見した長周期に近い彗星。" },
+                { name: "209P LINEAR彗星", color: 0xCCDDFF, size: 110, a: 810000, e: 0.694, speed: 0.13, meta: "短周期彗星", desc: "2014年に新流星群(5月カメレオン座流星群)を生み出した。" },
+                { name: "238P リード彗星", color: 0xDDEECC, size: 100, a: 1050000, e: 0.253, speed: 0.10, meta: "メインベルト彗星", desc: "小惑星帯内で彗星活動を示すメインベルト彗星の一つ。" },
+                { name: "273P ポンス・ガンバール彗星", color: 0xFFEEBB, size: 140, a: 4800000, e: 0.954, speed: 0.04, meta: "ハレー型彗星", desc: "1827年にポンスが発見。周期約187年。" },
+                { name: "289P ブランペイン彗星", color: 0xAADDFF, size: 100, a: 600000, e: 0.567, speed: 0.16, meta: "短周期彗星", desc: "フェニックス座流星群の母天体候補。" },
+                { name: "332P 池谷・村上彗星", color: 0xFFCCEE, size: 130, a: 1800000, e: 0.782, speed: 0.07, meta: "短周期彗星", desc: "2010年に池谷薫と村上茂が発見した日本人発見彗星。崩壊が観測された。" },
+                { name: "D/1770 L1 レクセル彗星", color: 0x88FFFF, size: 150, a: 600000, e: 0.786, speed: 0.16, meta: "消滅彗星", desc: "史上最も地球に接近した彗星。地球から約0.015AUまで接近。" },
+                { name: "D/1977 C1 スキッフ・香西彗星", color: 0xAAFFCC, size: 110, a: 1200000, e: 0.576, speed: 0.09, meta: "消滅彗星", desc: "日本人（香西）が共同発見した、後に見失われた彗星。" },
+                { name: "D/1978 R1 羽根田・カンポス彗星", color: 0xCCFFAA, size: 110, a: 1350000, e: 0.584, speed: 0.08, meta: "消滅彗星", desc: "日本人（羽根田）が共同発見した消滅彗星。" },
+                { name: "D/1993 F2 シューメーカー・レヴィ第9彗星", color: 0xFF8888, size: 200, a: 2100000, e: 0.220, speed: 0.07, meta: "消滅彗星（木星衝突）", desc: "1994年7月に木星へ衝突した彗星。21個の破片が連続衝突し史上初めて観測された惑星衝突。" }
+            ],
+            // ---- 非周期彗星 ----
+            aperiodic_comets: [
+                { name: "カエサル彗星", color: 0xFFEE88, size: 180, a: 8000000, e: 0.999, speed: 0.025, meta: "非周期彗星 (紀元前44年)", desc: "ユリウス・カエサルの死後に出現。ローマ人にはカエサルの魂の昇天と見なされた。" },
+                { name: "1106年の大彗星", color: 0xFFFFBB, size: 200, a: 12000000, e: 0.9998, speed: 0.02, meta: "非周期彗星", desc: "クロイツ族彗星の一つ。昼間でも肉眼で見えたと記録される。" },
+                { name: "1577年の大彗星（弾正星）", color: 0xFFFF99, size: 220, a: 14000000, e: 0.9985, speed: 0.018, meta: "非周期彗星", desc: "ティコ・ブラーエが精密観測。日本では「弾正星」と呼ばれた。" },
+                { name: "C/1652 Y1", color: 0xEEFFCC, size: 150, a: 10000000, e: 0.999, speed: 0.022, meta: "非周期彗星", desc: "17世紀に観測された非周期彗星。" },
+                { name: "池谷・張彗星（ヘヴェリウス彗星）", color: 0xCCFFEE, size: 180, a: 24000000, e: 0.9997, speed: 0.012, meta: "非周期彗星", desc: "1661年にヘヴェリウスが観測した大彗星。池谷薫による追跡研究でも知られる。" },
+                { name: "キルヒ彗星（1680年の大彗星）", color: 0xFFFFEE, size: 220, a: 15000000, e: 0.9999, speed: 0.017, meta: "非周期彗星", desc: "史上初めて望遠鏡で発見された彗星。ニュートンが軌道計算に用いた。" },
+                { name: "C/1686 R1", color: 0xCCEEFF, size: 140, a: 11000000, e: 0.9996, speed: 0.02, meta: "非周期彗星", desc: "17世紀末に観測された非周期彗星。" },
+                { name: "C/1689 X1", color: 0xDDEEFF, size: 140, a: 11500000, e: 0.9997, speed: 0.02, meta: "非周期彗星", desc: "17世紀末に観測された非周期彗星。" },
+                { name: "1729年の大彗星（サラバット彗星）", color: 0xFFDD99, size: 250, a: 18000000, e: 0.835, speed: 0.015, meta: "非周期彗星", desc: "史上最大級の核を持つとされる彗星。近日点でも遠く、それでも明るく見えた。" },
+                { name: "クリンケンベルグ彗星", color: 0xFFCC88, size: 200, a: 16000000, e: 0.9994, speed: 0.016, meta: "非周期彗星", desc: "1743〜44年に長い尾を持つ大彗星として観測された。" },
+                { name: "ド・シェゾー彗星", color: 0xFFEEAA, size: 210, a: 16500000, e: 0.9994, speed: 0.016, meta: "非周期彗星", desc: "1744年に6本もの尾を持った驚異の大彗星。" },
+                { name: "1760年の大彗星（パリジャン彗星）", color: 0xEEFFAA, size: 160, a: 13000000, e: 0.999, speed: 0.019, meta: "非周期彗星", desc: "18世紀中頃に観測された大彗星。" },
+                { name: "レクセル彗星 C/1770 L1", color: 0x88FFEE, size: 180, a: 7500000, e: 0.786, speed: 0.026, meta: "非周期彗星（最接近記録）", desc: "史上最も地球に接近した彗星（約0.015AU）。木星の引力で軌道が大きく変わった。" },
+                { name: "1771年の大彗星", color: 0xCCFFFF, size: 160, a: 12500000, e: 0.998, speed: 0.02, meta: "非周期彗星", desc: "18世紀後半に観測された大彗星。" },
+                { name: "1807年の大彗星", color: 0xFFFFCC, size: 190, a: 14000000, e: 0.9995, speed: 0.018, meta: "非周期彗星", desc: "ナポレオン戦争時代に現れた大彗星。" },
+                { name: "1811年の大彗星（フロジェルグ大彗星）", color: 0xFFEEDD, size: 240, a: 19000000, e: 0.9951, speed: 0.014, meta: "非周期彗星", desc: "約9ヶ月間肉眼で見え続けた大彗星。史上最大級の核を持つと言われる。" },
+                { name: "1819年の大彗星（トラレス彗星）", color: 0xFFDDCC, size: 170, a: 13500000, e: 0.999, speed: 0.019, meta: "非周期彗星", desc: "1819年に観測された大彗星。" },
+                { name: "1823年の大彗星", color: 0xFFCCBB, size: 160, a: 12000000, e: 0.998, speed: 0.02, meta: "非周期彗星", desc: "19世紀初頭の大彗星。" },
+                { name: "ポン彗星 C/1825 N1", color: 0xDDCCBB, size: 150, a: 11000000, e: 0.999, speed: 0.021, meta: "非周期彗星", desc: "彗星の多産な発見者ジャン=ルイ・ポンが発見。" },
+                { name: "1843年3月の大彗星（3月の大彗星）", color: 0xFFFF88, size: 230, a: 16000000, e: 0.9999, speed: 0.016, meta: "非周期彗星（グレートコメット）", desc: "クロイツ族。太陽にほぼ接触するほど接近し、昼間でも見えた。尾の長さは記録的。" },
+                { name: "1844年の大彗星", color: 0xFFEE88, size: 180, a: 12000000, e: 0.999, speed: 0.02, meta: "非周期彗星", desc: "1844年に南半球で明るく見えた大彗星。" },
+                { name: "ハインド彗星 C/1847 C1", color: 0xEEDD88, size: 160, a: 12500000, e: 0.9992, speed: 0.02, meta: "非周期彗星", desc: "1847年にジョン・ラッセル・ハインドが発見。" },
+                { name: "ミッチェル彗星 C/1847 T1", color: 0xDDCC88, size: 150, a: 11500000, e: 0.999, speed: 0.021, meta: "非周期彗星", desc: "女性天文学者マリア・ミッチェルが発見した彗星。" },
+                { name: "ドナティ彗星 C/1858 L1", color: 0xFF99CC, size: 240, a: 13000000, e: 0.9963, speed: 0.019, meta: "非周期彗星（グレートコメット）", desc: "19世紀最も美しい彗星の一つ。三本の尾が美しく弧を描いた。写真に初めて撮られた彗星。" },
+                { name: "テバット彗星（1861年の大彗星）", color: 0xCCDDFF, size: 230, a: 17000000, e: 0.9851, speed: 0.015, meta: "非周期彗星（グレートコメット）", desc: "地球が彗星の尾を通過した、数少ない記録の一つ。" },
+                { name: "1865年の南天の大彗星", color: 0xCCFFEE, size: 190, a: 13500000, e: 0.999, speed: 0.019, meta: "非周期彗星", desc: "南半球で明るく見えたクロイツ族の大彗星。" },
+                { name: "コッジャ彗星 C/1874 H1", color: 0xEEFFCC, size: 180, a: 14000000, e: 0.9985, speed: 0.018, meta: "非周期彗星", desc: "1874年に観測された大彗星。" },
+                { name: "1882年9月の大彗星", color: 0xFFFF44, size: 280, a: 18000000, e: 0.9999, speed: 0.014, meta: "非周期彗星（グレートコメット）", desc: "クロイツ族。太陽に極めて近づき、白昼でも目視された史上最も明るい彗星の一つ。分裂も観測。" },
+                { name: "1901年の大彗星 C/1901 G1", color: 0xFFFF66, size: 200, a: 15000000, e: 0.999, speed: 0.017, meta: "非周期彗星", desc: "20世紀初頭に南半球で明るく見えた大彗星。" },
+                { name: "C/1910 A1（1月の大彗星）", color: 0xFFFF88, size: 250, a: 17000000, e: 0.9999, speed: 0.015, meta: "非周期彗星", desc: "1910年1月に突然出現。ハレー彗星と同年に出現したため混同された。" },
+                { name: "ベリャヴスキー彗星 C/1911 S3", color: 0xCCEEFF, size: 170, a: 13000000, e: 0.999, speed: 0.019, meta: "非周期彗星", desc: "1911年に発見された大彗星。" },
+                { name: "南天の大彗星 C/1947 X1", color: 0xFFEECC, size: 200, a: 15000000, e: 0.9995, speed: 0.017, meta: "非周期彗星", desc: "1947年に南半球で明るく見えた大彗星。" },
+                { name: "アラン・ローラン彗星 C/1956 R1", color: 0xFFDDCC, size: 190, a: 16000000, e: 0.9993, speed: 0.016, meta: "非周期彗星", desc: "1956年に発見された大彗星。近日点では明るく、長い尾を引いた。" },
+                { name: "ムルコス彗星 C/1957 P1", color: 0xEECCBB, size: 180, a: 14000000, e: 0.9994, speed: 0.018, meta: "非周期彗星", desc: "1957年のスプートニク打ち上げと同年に現れた明るい彗星。" },
+                { name: "ウィルソン・ハバード彗星 C/1961 O1", color: 0xDDBBAA, size: 160, a: 12000000, e: 0.999, speed: 0.02, meta: "非周期彗星", desc: "1961年に発見された彗星。" },
+                { name: "ヒューメイソン彗星 C/1961 R1", color: 0xCCAA99, size: 220, a: 20000000, e: 0.9901, speed: 0.013, meta: "非周期彗星", desc: "非常に遠い近日点を持ちながら明るかった異常な彗星。低温でも活動していた。" },
+                { name: "関・ラインズ彗星 C/1962 C1", color: 0xFFEEBB, size: 190, a: 15000000, e: 0.9991, speed: 0.017, meta: "非周期彗星", desc: "1962年に関勉が発見した日本人発見の大彗星。" },
+                { name: "池谷・関彗星 C/1965 S1", color: 0xFFFF55, size: 270, a: 17500000, e: 0.9999, speed: 0.015, meta: "非周期彗星（グレートコメット）", desc: "クロイツ族。1965年に池谷薫と関勉が発見。太陽コロナに突入するほど接近し、昼間でも見えた。" },
+                { name: "ベネット彗星 C/1969 Y1", color: 0xFFEE66, size: 220, a: 16000000, e: 0.996, speed: 0.016, meta: "非周期彗星", desc: "1969年に発見。1970年に非常に明るくなり美しい尾を見せた。" },
+                { name: "コホーテク彗星 C/1973 E1", color: 0xCCCCFF, size: 180, a: 16000000, e: 0.99989, speed: 0.016, meta: "非周期彗星", desc: "「世紀の大彗星」と期待されたが実際は期待外れ。初めてスカイラブ宇宙船から観測された彗星。" },
+                { name: "ウェスト彗星 C/1975 V1", color: 0xFFFF99, size: 250, a: 18000000, e: 0.99997, speed: 0.014, meta: "非周期彗星", desc: "1976年に美しい扇形の尾を持ち4つに分裂した大彗星。" },
+                { name: "ボーエル彗星 C/1980 E1", color: 0xAAFFFF, size: 200, a: 30000000, e: 1.057, speed: 0.011, meta: "非周期彗星（双曲線軌道）", desc: "木星の重力で太陽系外に脱出する双曲線軌道を持つ。史上最高離心率を記録した彗星の一つ。" },
+                { name: "シューメーカー・レヴィ第9彗星", color: 0xFF8866, size: 220, a: 2100000, e: 0.220, speed: 0.07, meta: "非周期彗星（木星衝突）", desc: "1994年7月に木星へ衝突。21個の破片が次々衝突し、惑星衝突を史上初めてリアルタイム観測した。" },
+                { name: "ヘール・ボップ彗星 C/1995 O1", color: 0xFFFFFF, size: 270, a: 25000000, e: 0.9951, speed: 0.012, meta: "非周期彗星（グレートコメット）", desc: "1997年に肉眼で18ヶ月以上見え続けた20世紀最大の大彗星。青いイオンの尾と白い塵の尾が美しかった。" },
+                { name: "百武彗星 C/1996 B2", color: 0x88FFFF, size: 230, a: 23000000, e: 0.9999, speed: 0.013, meta: "非周期彗星", desc: "1996年に地球に大接近した彗星。X線を放出する彗星として初めて確認された。" },
+                { name: "朱・ベーラム彗星 C/1988 A1", color: 0xCCDDFF, size: 170, a: 14000000, e: 0.999, speed: 0.018, meta: "非周期彗星", desc: "中国とオーストラリアの天文家が共同発見した彗星。" },
+                { name: "マックホルツ彗星 C/2004 Q2", color: 0xFFDDFF, size: 200, a: 17000000, e: 0.9998, speed: 0.016, meta: "非周期彗星", desc: "2004年に発見。2005年に肉眼で見え、プレアデス星団の近くを通過した。" },
+                { name: "ポイマンスキー彗星 C/2006 A1", color: 0xEECCFF, size: 170, a: 15000000, e: 0.9997, speed: 0.017, meta: "非周期彗星", desc: "2006年に発見。双眼鏡で容易に見えた。" },
+                { name: "マックノート彗星 C/2006 P1", color: 0xFFDD88, size: 280, a: 35000000, e: 1.000016, speed: 0.01, meta: "非周期彗星（グレートコメット）", desc: "2007年に非常に明るくなり（-5.5等）、昼間でも見えた。南半球で壮大な扇形の尾を展開した。" },
+                { name: "SOHO彗星", color: 0xFFEEAA, size: 120, a: 6000000, e: 0.9998, speed: 0.04, meta: "非周期彗星（太陽掠過彗星群）", desc: "SOHOが継続的に発見しているクロイツ族などの太陽掠過彗星群。発見数は4000個超。" },
+                { name: "鹿林彗星 C/2007 N3", color: 0xCCFFDD, size: 170, a: 14000000, e: 0.9999, speed: 0.018, meta: "非周期彗星", desc: "台湾・鹿林天文台が2007年に発見。2009年に地球に大接近した。" },
+                { name: "陳・高彗星 C/2009 R1", color: 0xDDFFCC, size: 180, a: 14500000, e: 0.9995, speed: 0.018, meta: "非周期彗星", desc: "2009年に発見。2010年に明るくなるも分裂した彗星。" },
+                { name: "パンスターズ彗星 C/2011 L4", color: 0xCCEEFF, size: 200, a: 17000000, e: 0.9999, speed: 0.016, meta: "非周期彗星", desc: "2013年に肉眼で見えた大彗星。美しい尾を持ち世界中で観測された。" },
+                { name: "ラヴジョイ彗星 C/2011 W3", color: 0xFF88FF, size: 190, a: 16000000, e: 0.9999, speed: 0.017, meta: "非周期彗星（クロイツ族）", desc: "2011年に太陽コロナに突入後、生き残って尾を引き再出現。その様子が宇宙から撮影された。" },
+                { name: "アイソン彗星 C/2012 S1", color: 0xFFCC55, size: 200, a: 18000000, e: 0.9999963, speed: 0.015, meta: "非周期彗星（「世紀の大彗星」候補）", desc: "2013年に大彗星が期待されたが、近日点通過後に分裂・消滅した。" },
+                { name: "サイディング・スプリング彗星 C/2013 A1", color: 0xCCBBFF, size: 190, a: 17000000, e: 0.9999, speed: 0.016, meta: "非周期彗星", desc: "2014年に火星に約14万km接近し、火星探査機が観測した。" }
             ],
             satellites: [
-                { name: "ISS", parent: "地球", color: 0xFFFFFF, size: 100, dist: 15000, speed: 1.2, meta: "国際宇宙ステーション", desc: "高度約400kmを秒速約7.7kmで周回する有人宇宙施設。" }
+                { name: "ISS", parent: "地球", color: 0xFFFFFF, size: 100, dist: 20250, speed: 1.2, meta: "国際宇宙ステーション", desc: "高度約400kmを秒速約7.7kmで周回する有人宇宙施設。" }
             ],
             stars: [
                 { name: "シリウス", color: 0xCCDDFF, size: 9000, pos: [-1200000, -300000, 1600000], meta: "おおいぬ座 α星", desc: "全天第1位の輝星。地球から約8.6光年. 白く輝く主系列星。" },
@@ -300,12 +408,12 @@ app.get('/', (c) => {
                 "地球": {
                     named: ["月"],
                     sizes: { "月": 200 },
-                    distStart: 30000, distStep: 15000
+                    distStart: 40500, distStep: 20250
                 },
                 "火星": {
                     named: ["フォボス", "ダイモス"],
                     sizes: {},
-                    distStart: 12000, distStep: 8000
+                    distStart: 16200, distStep: 10800
                 },
                 "木星": {
                     // 95個: 主要4個（ガリレオ衛星）+ 内側群 + 外側群（不規則衛星）
@@ -332,7 +440,7 @@ app.get('/', (c) => {
                         "プロメテウス", "エコー", "ディオーネ小"
                     ],
                     sizes: { "イオ": 480, "エウロパ": 420, "ガニメデ": 560, "カリスト": 500, "アマルテア": 200 },
-                    distStart: 20000, distStep: 6000
+                    distStart: 27000, distStep: 8100
                 },
                 "土星": {
                     // 146個
@@ -366,7 +474,7 @@ app.get('/', (c) => {
                         "S/2019 S 19", "S/2019 S 20", "S/2019 S 21", "S/2020 S 1", "S/2021 S 1"
                     ],
                     sizes: { "タイタン": 560, "レア": 300, "ディオネ": 260, "テティス": 250, "エンケラドゥス": 220, "ミマス": 180, "アイアペトゥス": 290, "ヒペリオン": 200 },
-                    distStart: 18000, distStep: 4000
+                    distStart: 24300, distStep: 5400
                 },
                 "天王星": {
                     // 28個
@@ -379,7 +487,7 @@ app.get('/', (c) => {
                         "フェルディナンド", "S/2001 U 1", "S/2023 U 1"
                     ],
                     sizes: { "チタニア": 340, "オベロン": 330, "アリエル": 280, "ウンブリエル": 270, "ミランダ": 200 },
-                    distStart: 15000, distStep: 5500
+                    distStart: 20250, distStep: 7425
                 },
                 "海王星": {
                     // 16個
@@ -390,12 +498,12 @@ app.get('/', (c) => {
                         "S/2021 N 1"
                     ],
                     sizes: { "トリトン": 480, "プロテウス": 220, "ネレイド": 180, "ラリッサ": 150 },
-                    distStart: 14000, distStep: 6000
+                    distStart: 18900, distStep: 8100
                 },
                 "冥王星": {
                     named: ["カロン", "ニクス", "ヒドラ", "ケルベロス", "スティクス"],
                     sizes: { "カロン": 240 },
-                    distStart: 10000, distStep: 8000
+                    distStart: 13500, distStep: 10800
                 }
             };
 
@@ -580,13 +688,13 @@ app.get('/', (c) => {
             const count = 870000;
             const positions = new Float32Array(count * 3);
             const colors = new Float32Array(count * 3);
-            // 惑星スケール×10に合わせてベルトも×10
-            const innerRadius = 1260000;
-            const outerRadius = 1980000;
+            // 惑星スケール×10×1.35に合わせてベルトも拡大
+            const innerRadius = 1701000;
+            const outerRadius = 2673000;
             for (let i = 0; i < count; i++) {
                 const angle = Math.random() * Math.PI * 2;
                 const dist = innerRadius + (Math.random() * (outerRadius - innerRadius));
-                const spread = 4000;
+                const spread = 5400;
                 positions[i * 3] = Math.cos(angle) * dist + (Math.random() - 0.5) * spread;
                 positions[i * 3 + 1] = (Math.random() - 0.5) * spread * 0.5;
                 positions[i * 3 + 2] = Math.sin(angle) * dist + (Math.random() - 0.5) * spread;
@@ -678,6 +786,24 @@ app.get('/', (c) => {
                 createOrbit(0, d.color || 0x00FFFF, null, true, d.a, d.e);
             });
 
+            DATA.periodic_comets.forEach(function(d) {
+                const group = new THREE.Group();
+                group.add(new THREE.Mesh(new THREE.SphereGeometry(d.size, 16, 16), new THREE.MeshBasicMaterial({ color: 0xFFFFFF })));
+                group.add(createGlow(d.size * 25, d.color || 0x00FFFF, 0.3));
+                mainGroup.add(group);
+                celestialObjects.push({ mesh: group, data: d, angle: Math.random()*Math.PI*2, label: createLabel(d.name), type: 'periodic_comet' });
+                createOrbit(0, d.color || 0x00FFFF, null, true, d.a, d.e);
+            });
+
+            DATA.aperiodic_comets.forEach(function(d) {
+                const group = new THREE.Group();
+                group.add(new THREE.Mesh(new THREE.SphereGeometry(d.size, 16, 16), new THREE.MeshBasicMaterial({ color: 0xFFFFFF })));
+                group.add(createGlow(d.size * 30, d.color || 0xFFEE88, 0.35));
+                mainGroup.add(group);
+                celestialObjects.push({ mesh: group, data: d, angle: Math.random()*Math.PI*2, label: createLabel(d.name), type: 'aperiodic_comet' });
+                createOrbit(0, d.color || 0xFFEE88, null, true, d.a, d.e);
+            });
+
             DATA.satellites.forEach(function(d) {
                 const group = new THREE.Group();
                 group.add(new THREE.Mesh(new THREE.SphereGeometry(d.size, 12, 12), new THREE.MeshPhongMaterial({ color: d.color })));
@@ -760,7 +886,7 @@ app.get('/', (c) => {
                 });
             } else {
                 let list = DATA[cat];
-                const labels = {solar:"太陽系主要天体", dwarfs:"準惑星", asteroids:"主要小惑星", tnos:"地球外縁天体", comets:"主要彗星", stars:"恒星カタログ", milkyway:"銀河系構造・星雲", galaxies:"主要銀河", clusters:"銀河群・銀河団", superclusters:"超銀河団構造", cosmic:"大規模構造", others:"その他"};
+                const labels = {solar:"太陽系主要天体", dwarfs:"準惑星", asteroids:"主要小惑星", tnos:"地球外縁天体", comets:"彗星（旧）", periodic_comets:"番号登録周期彗星 (1P〜448P + D/)", aperiodic_comets:"非周期彗星", stars:"恒星カタログ", milkyway:"銀河系構造・星雲", galaxies:"主要銀河", clusters:"銀河群・銀河団", superclusters:"超銀河団構造", cosmic:"大規模構造", others:"その他"};
                 const l = document.createElement('div'); l.className = 'category-label'; l.innerText = labels[cat]; container.appendChild(l);
                 list.forEach(function(d) {
                     const b = document.createElement('button'); b.className = 'celestial-btn'; b.innerText = d.name;
@@ -780,6 +906,7 @@ app.get('/', (c) => {
             else if (obj.type === 'star') zoomDistance = size * 10;
             else if (obj.type === 'solar' && obj.data.dist === 0) zoomDistance = size * 10;
             else if (obj.type === 'satellite') zoomDistance = size * 80;
+            else if (obj.type === 'periodic_comet' || obj.type === 'aperiodic_comet' || obj.type === 'comet') zoomDistance = size * 60;
             else if (size < 100) zoomDistance = 30000;
             else zoomDistance = size * 80;
             document.getElementById('info-name').innerText = obj.data.name;
@@ -903,6 +1030,7 @@ app.get('/', (c) => {
                 let limit = 1000000000;
                 if (p.type === 'satellite') limit = 50000000;
                 else if (p.type === 'asteroid') limit = 300000000;
+                else if (p.type === 'comet' || p.type === 'periodic_comet' || p.type === 'aperiodic_comet') limit = 800000000;
                 else if (p.type === 'others') limit = 2000000000;
                 else if (p.type === 'cosmic') limit = 100000000000;
                 else if (p.type === 'supercluster') limit = 50000000000;
